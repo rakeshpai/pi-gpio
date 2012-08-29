@@ -1,0 +1,20 @@
+{
+  "author": "Rakesh Pai <rakeshpai@gmail.com>",
+  "name": "pi-gpio",
+  "version": "0.0.1",
+  "repository": {
+    "url": "git@github.com:rakeshpai/pi-gpio.git"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "1.x",
+    "should": "1.x"
+  },
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  },
+  "scripts": {
+    "test": "mocha --reporter spec"
+  }
+}
