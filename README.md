@@ -291,14 +291,8 @@ Writes ``value`` to ``pinNumber``. Will obviously fail if the pin is not in the 
 
 ## Misc
 
-* To run tests:
-```
-	sudo npm install -g mocha
-	cd node_modules/pi-gpio
-	npm install
-	npm test
-```
-* This module was created, ``git push``'ed and ``npm publish``'ed all from the Raspberry Pi!
+* To run tests: ``npm install && npm test`` where you've got the checkout.
+* This module was created, ``git push``'ed and ``npm publish``'ed all from the Raspberry Pi! The Pi rocks!
 
 ## Coming soon
 
