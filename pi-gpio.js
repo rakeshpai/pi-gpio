@@ -53,7 +53,7 @@ function sanitizePinNumber(pinNumber) {
 }
 
 function sanitizeDirection(direction) {
-	direction = direction.toLowerCase().trim();
+	direction = (direction || "").toLowerCase().trim();
 	if(direction === "in" || direction === "input") {
 		return "in";
 	} else if(direction === "out" || direction === "output" || !direction) {
