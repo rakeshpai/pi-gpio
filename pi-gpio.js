@@ -92,7 +92,7 @@ var gpio = {
 		pinNumber = sanitizePinNumber(pinNumber);
 
 		fs.readFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/direction", "utf8", function(err, direction) {
-			if(err) return done(err);
+			if(err) return callback(err);
 			callback(null, sanitizeDirection(direction.trim()));
 		});
 	},
