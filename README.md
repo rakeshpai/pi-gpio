@@ -268,7 +268,7 @@ Gets the direction of the pin. Acts like a getter for the method above.
 
 ### .read(pinNumber, [callback])
 
-Reads the current value of the pin. Most useful if the pin is in the ``output`` direction.
+Reads the current value of the pin. Most useful if the pin is in the ``input`` direction.
 
 * ``pinNumber``: As usual.
 * ``callback``: Will receive a possible error object as the first argument, and the value of the pin as the second argument. The value will be either ``0`` or ``1`` (numeric).
