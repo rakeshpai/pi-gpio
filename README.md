@@ -232,14 +232,17 @@ That's it!
 
 ## Usage
 
-### .open(pinNumber, [direction = "output"], [callback])
+### .open(pinNumber, [options], [callback])
 
 Aliased to ``.export``
 
 Makes ``pinNumber`` available for use. 
 
 * ``pinNumber``: The pin number to make available. Remember, ``pinNumber`` is the physical pin number on the Pi. 
-* ``direction``: (Optional) Direction can either be ``input`` or ``output``, depending on what you want to do with the pin. You could alternatively use ``in`` or ``out``. Default: ``output``.
+* ``options``: (Optional) Options takes an object with two members:
+	* options.direction can be either ``input`` or ``output`` (or alternately ``in`` or ``out``). Default: ``output``.
+	* options.pull can be either ``pullup`` or ``pulldown``, depending on how you want to set the Pi's pullup/pulldown resistors. Default: undefined.
+	* Alternately, options will take a string with the two parameters, such as ``output`` or ``input pullup``.
 * ``callback``: (Optional) Will be called when the pin is available for use. May receive an error as the first argument if something went wrong.
 
 ### .close(pinNumber, [callback])
