@@ -63,21 +63,42 @@ function sanitizeDirection(direction) {
 	}
 }
 
+function sanitizePull(pull) {
+	pull = (pull || "").toLowerCase().trim();
+	if (pull === "pullup" || pull === "pulldown") {
+		return pull;
+	} else {
+		return "";
+	}
+}
+
+function sanitizeOptions(options) {
+	if (options && typeof options === "string") {
+		var optionTokens = options.split(' ');
+		options = {};
+		options.direction = optionTokens[0];
+		options.pull = optionTokens[1];
+	}
+	options.direction = sanitizeDirection(options.direction);
+	options.pull = sanitizePull(options.pull);
+	return options;
+}
+
 var gpio = {
-	open: function(pinNumber, direction, callback) {
+	open: function(pinNumber, options, callback) {
 		pinNumber = sanitizePinNumber(pinNumber);
 
-		if(!callback && typeof direction === "function") {
-			callback = direction;
-			direction = "out";
+		if(!callback && typeof options === "function") {
+			callback = options;
+			options = "out";
 		}
 
-		direction = sanitizeDirection(direction);
+		options = sanitizeOptions(options);
 
-		exec(gpioAdmin + " export " + pinMapping[pinNumber], handleExecResponse("open", pinNumber, function(err) {
+		exec(gpioAdmin + " export " + pinMapping[pinNumber] + " " + options.pull, handleExecResponse("open", pinNumber, function(err) {
 			if(err) return (callback || noop)(err);
 
-			gpio.setDirection(pinNumber, direction, callback);
+			gpio.setDirection(pinNumber, options.direction, callback);
 		}));
 	},
 
