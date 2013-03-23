@@ -13,6 +13,10 @@ gpio.open(16, "output", function(err) {		// Open pin 16 for output
 });
 ```
 
+## Unmaintained
+
+This project is unmaintained, and is up for adoption. If anyone wants to take over the development of this project, please drop me a line, and we'll take it from there. Another way to help would be to review the pull requests and test them on a Pi for correctness.
+
 ## About the pin configuration
 
 This couldn't have been more confusing. Raspberry Pi's physical pins are not laid out in any particular logical order. Most of them are given the names of the pins of the Broadcom chip it uses (BCM2835). There isn't even a logical relationship between the physical layout of the Raspberry Pi pin header and the Broadcom chip's pinout. The OS recognizes the names of the Broadcom chip and has nothing to do with the physical pin layout on the Pi. To add to the fun, the specs for the Broadcom chip are nearly impossible to get!
