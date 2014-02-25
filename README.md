@@ -15,10 +15,11 @@ gpio.open(16, "output", function(err) {		// Open pin 16 for output
 
 ## How you can help
 
-Ways you can help
-	*Review the pull requests and test them on a Pi for correctness.
-	*Report Bugs.
-	*Fix a bug or add something awesome, Send a pull request.
+Ways you can help:
+
+    - Review the pull requests and test them on a Pi for correctness.
+    - Report Bugs.
+    - Fix a bug or add something awesome, Send a pull request.
 
 ## About the pin configuration
 
