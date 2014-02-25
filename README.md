@@ -13,9 +13,12 @@ gpio.open(16, "output", function(err) {		// Open pin 16 for output
 });
 ```
 
-## Unmaintained
+## How you can help
 
-This project is unmaintained, and is up for adoption. If anyone wants to take over the development of this project, please drop me a line, and we'll take it from there. Another way to help would be to review the pull requests and test them on a Pi for correctness.
+Ways you can help
+	*Review the pull requests and test them on a Pi for correctness.
+	*Report Bugs.
+	*Fix a bug or add something awesome, Send a pull request.
 
 ## About the pin configuration
 
