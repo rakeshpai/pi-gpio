@@ -6,6 +6,12 @@ var fs = require("fs"),
 var gpioAdmin = "gpio-admin",
 	sysFsPath = "/sys/devices/virtual/gpio";
 
+var rev = fs.readFileSync("/proc/cpuinfo").toString().split("\n").filter(function(line) {
+	return line.indexOf("Revision") == 0;
+})[0].split(":")[1].trim();
+
+rev = parseInt(rev, 16) < 3 ? 1 : 2; // http://elinux.org/RPi_HardwareHistory#Board_Revision_History
+
 var pinMapping = {
 	"3": 0,
 	"5": 1,
@@ -25,6 +31,12 @@ var pinMapping = {
 	"24": 8,
 	"26": 7
 };
+
+if(rev == 2) {
+	pinMapping["3"] = 2;
+	pinMapping["5"] = 3;
+	pinMapping["13"] = 27;
+}
 
 function isNumber(number) {
 	return !isNaN(parseInt(number, 10));
@@ -64,6 +76,8 @@ function sanitizeDirection(direction) {
 }
 
 var gpio = {
+	rev: rev,
+	
 	open: function(pinNumber, direction, callback) {
 		pinNumber = sanitizePinNumber(pinNumber);
 
