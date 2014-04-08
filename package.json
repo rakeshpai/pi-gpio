@@ -2,15 +2,22 @@
   "author": "Rakesh Pai <rakeshpai@gmail.com>",
   "name": "pi-gpio",
   "description": "A simple node.js-based GPIO helper for the Raspberry Pi",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {
     "type": "git",
     "url": "git@github.com:rakeshpai/pi-gpio.git"
   },
   "homepage": "https://github.com/rakeshpai/pi-gpio",
   "main": "./pi-gpio",
-  "bugs": {"url": "https://github.com/rakeshpai/pi-gpio/issues"},
-  "tags": ["raspberry", "pi", "gpio", "simple"],
+  "bugs": {
+    "url": "https://github.com/rakeshpai/pi-gpio/issues"
+  },
+  "tags": [
+    "raspberry",
+    "pi",
+    "gpio",
+    "simple"
+  ],
   "dependencies": {},
   "devDependencies": {
     "mocha": "1.x",
