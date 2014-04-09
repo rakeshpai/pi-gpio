@@ -247,10 +247,7 @@ Aliased to ``.export``
 Makes ``pinNumber`` available for use. 
 
 * ``pinNumber``: The pin number to make available. Remember, ``pinNumber`` is the physical pin number on the Pi. 
-* ``options``: (Optional) Options takes an object with two members:
-	* options.direction can be either ``input`` or ``output`` (or alternately ``in`` or ``out``). Default: ``output``.
-	* options.pull can be either ``pullup`` or ``pulldown``, depending on how you want to set the Pi's pullup/pulldown resistors. Default: undefined.
-	* Alternately, options will take a string with the two parameters, such as ``output`` or ``input pullup``.
+* ``options``: (Optional) Should be a string, such as ``input`` or ``input pullup``. You can specify whether the pin direction should be `input` or `output` (or `in` or `out`). You can additionally set the internal pullup / pulldown resistor by sepcifying `pullup` or `pulldown` (or `up` or `down`). If options isn't provided, it defaults to `output`. If a direction (`input` or `output`) is not specified (eg. only `up`), then the direction defaults to `output`.
 * ``callback``: (Optional) Will be called when the pin is available for use. May receive an error as the first argument if something went wrong.
 
 ### .close(pinNumber, [callback])

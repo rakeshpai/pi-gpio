@@ -75,25 +75,32 @@ function sanitizeDirection(direction) {
 	}
 }
 
-function sanitizePull(pull) {
-	pull = (pull || "").toLowerCase().trim();
-	if(pull === "pullup" || pull === "pulldown") {
-		return pull;
-	} else {
-		return "";
-	}
-}
-
 function sanitizeOptions(options) {
-	if(options && typeof options === "string") {
-		var optionTokens = options.split(' ');
-		options = {};
-		options.direction = optionTokens[0];
-		options.pull = optionTokens[1];
+	var sanitized = {};
+
+	options.split(" ").forEach(function(token) {
+		if(token == "in" || token == "input") {
+			sanitized.direction = "in";
+		}
+
+		if(token == "pullup" || token == "up") {
+			sanitized.pull = "pullup";
+		}
+
+		if(token == "pulldown" || token == "down") {
+			sanitized.pull = "pulldown";
+		}
+	});
+
+	if(!sanitized.direction) {
+		sanitized.direction = "out";
 	}
-	options.direction = sanitizeDirection(options.direction);
-	options.pull = sanitizePull(options.pull);
-	return options;
+
+	if(!sanitized.pull) {
+		sanitized.pull = "";
+	}
+
+	return sanitized;
 }
 
 var gpio = {
