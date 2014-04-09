@@ -127,11 +127,12 @@ var gpio = {
 		pinNumber = sanitizePinNumber(pinNumber);
 		direction = sanitizeDirection(direction);
 
-		fs.writeFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/direction", direction, callback);
+		fs.writeFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/direction", direction, (callback || noop));
 	},
 
 	getDirection: function(pinNumber, callback) {
 		pinNumber = sanitizePinNumber(pinNumber);
+		callback = callback || noop;
 
 		fs.readFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/direction", "utf8", function(err, direction) {
 			if(err) return callback(err);
