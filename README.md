@@ -1,7 +1,7 @@
 pi-gpio
 =======
 
-pi-gpio is a simple node.js based library to help access the GPIO of the Raspberry Pi (Debian Wheezy). It's modelled loosely around the built-in ``fs`` module.
+pi-gpio is a simple node.js based library to help access the GPIO of the Raspberry Pi (Debian Wheezy). It's modelled loosely around the built-in ``fs`` module. Works with the original Raspberry Pi (A and B), the model B revision 2 boards, and the Raspberry Pi Model B+.
 
 ```javascript
 var gpio = require("pi-gpio");
@@ -25,17 +25,17 @@ Ways you can help:
 
 This couldn't have been more confusing. Raspberry Pi's physical pins are not laid out in any particular logical order. Most of them are given the names of the pins of the Broadcom chip it uses (BCM2835). There isn't even a logical relationship between the physical layout of the Raspberry Pi pin header and the Broadcom chip's pinout. The OS recognizes the names of the Broadcom chip and has nothing to do with the physical pin layout on the Pi. To add to the fun, the specs for the Broadcom chip are nearly impossible to get!
 
-This library simplifies all of this (hopefully), by abstracting away the Broadcom chip details. You only need to refer to the pins as they are on the physical pin layout on the Raspberry PI. For your reference, the pin layout follows. The cells with the grey background represent the pins, with P1 at the top left.
+This library simplifies all of this (hopefully), by abstracting away the Broadcom chip details. You only need to refer to the pins as they are on the physical pin layout on the Raspberry PI. For your reference, the pin layout follows. All the pins marked "GPIO" can be used with this library, using pin numbers as below.
 
 <table>
 	<tr>
 		<td>
 			P1 - 3.3v
 		</td>
-		<td style="background: #ddd">
+		<td>
 			1
 		</td>
-		<td style="background: #ddd">
+		<td>
 			2
 		</td>
 		<td>
@@ -46,10 +46,10 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		<td>
 			I2C SDA
 		</td>
-		<td style="background: #ddd">
+		<td>
 			3
 		</td>
-		<td  style="background: #ddd">
+		<td >
 			4
 		</td>
 		<td>
@@ -60,10 +60,10 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		<td>
 			I2C SCL
 		</td>
-		<td style="background: #ddd">
+		<td>
 			5
 		</td>
-		<td style="background: #ddd">
+		<td>
 			6
 		</td>
 		<td>
@@ -71,13 +71,13 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		</td>
 	</tr>
 	<tr>
-		<td style="background: #90cf4d">
+		<td>
 			GPIO
 		</td>
-		<td style="background: #ddd">
+		<td>
 			7
 		</td>
-		<td style="background: #ddd">
+		<td>
 			8
 		</td>
 		<td>
@@ -88,10 +88,10 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		<td>
 			--
 		</td>
-		<td style="background: #ddd">
+		<td>
 			9
 		</td>
-		<td style="background: #ddd">
+		<td>
 			10
 		</td>
 		<td>
@@ -99,27 +99,27 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		</td>
 	</tr>
 	<tr>
-		<td style="background: #90cf4d">
+		<td>
 			GPIO
 		</td>
-		<td style="background: #ddd">
+		<td>
 			11
 		</td>
-		<td style="background: #ddd">
+		<td>
 			12
 		</td>
-		<td style="background: #90cf4d">
+		<td>
 			GPIO
 		</td>
 	</tr>
 	<tr>
-		<td style="background: #90cf4d">
+		<td>
 			GPIO
 		</td>
-		<td style="background: #ddd">
+		<td>
 			13
 		</td>
-		<td style="background: #ddd">
+		<td>
 			14
 		</td>
 		<td>
@@ -127,16 +127,16 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		</td>
 	</tr>
 	<tr>
-		<td style="background: #90cf4d">
+		<td>
 			GPIO
 		</td>
-		<td style="background: #ddd">
+		<td>
 			15
 		</td>
-		<td style="background: #ddd">
+		<td>
 			16
 		</td>
-		<td style="background: #90cf4d">
+		<td>
 			GPIO
 		</td>
 	</tr>
@@ -144,13 +144,13 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		<td>
 			--
 		</td>
-		<td style="background: #ddd">
+		<td>
 			17
 		</td>
-		<td style="background: #ddd">
+		<td>
 			18
 		</td>
-		<td style="background: #90cf4d">
+		<td>
 			GPIO
 		</td>
 	</tr>
@@ -158,10 +158,10 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		<td>
 			SPI MOSI
 		</td>
-		<td style="background: #ddd">
+		<td>
 			19
 		</td>
-		<td style="background: #ddd">
+		<td>
 			20
 		</td>
 		<td>
@@ -172,13 +172,13 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		<td>
 			SPI MISO
 		</td>
-		<td style="background: #ddd">
+		<td>
 			21
 		</td>
-		<td style="background: #ddd">
+		<td>
 			22
 		</td>
-		<td style="background: #90cf4d">
+		<td>
 			GPIO
 		</td>
 	</tr>
@@ -186,10 +186,10 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		<td>
 			SPI SCLK
 		</td>
-		<td style="background: #ddd">
+		<td>
 			23
 		</td>
-		<td style="background: #ddd">
+		<td>
 			24
 		</td>
 		<td>
@@ -200,19 +200,120 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		<td>
 			--
 		</td>
-		<td style="background: #ddd">
+		<td>
 			25
 		</td>
-		<td style="background: #ddd">
+		<td>
 			26
 		</td>
 		<td>
 			SPI CE1
 		</td>
 	</tr>
+	<tr>
+		<td colspan="4">Model B+ pins</td>
+	</tr>
+	<tr>
+		<td>
+			ID_SD
+		</td>
+		<td>
+			27
+		</td>
+		<td>
+			28
+		</td>
+		<td>
+			ID_SC
+		</td>
+	</tr>
+	<tr>
+		<td>
+			GPIO
+		</td>
+		<td>
+			29
+		</td>
+		<td>
+			30
+		</td>
+		<td>
+			--
+		</td>
+	</tr>
+	<tr>
+		<td>
+			GPIO
+		</td>
+		<td>
+			31
+		</td>
+		<td>
+			32
+		</td>
+		<td>
+			GPIO
+		</td>
+	</tr>
+	<tr>
+		<td>
+			GPIO
+		</td>
+		<td>
+			33
+		</td>
+		<td>
+			34
+		</td>
+		<td>
+			--
+		</td>
+	</tr>
+	<tr>
+		<td>
+			GPIO
+		</td>
+		<td>
+			35
+		</td>
+		<td>
+			36
+		</td>
+		<td>
+			GPIO
+		</td>
+	</tr>
+	<tr>
+		<td>
+			GPIO
+		</td>
+		<td>
+			37
+		</td>
+		<td>
+			38
+		</td>
+		<td>
+			GPIO
+		</td>
+	</tr>
+	<tr>
+		<td>
+			GPIO
+		</td>
+		<td>
+			39
+		</td>
+		<td>
+			40
+		</td>
+		<td>
+			--
+		</td>
+	</tr>
 </table>
 
-That gives you several GPIO pins to play with: pins 7, 11, 12, 13, 15, 16, 18 and 22. You should provide these physical pin numbers to this library, and not bother with what they are called internally. Easy-peasy.
+That gives you several GPIO pins to play with: pins 7, 11, 12, 13, 15, 16, 18 and 22 (with the B+ giving 29, 31, 32, 33, 35, 37, 38 and 40). You should provide these physical pin numbers to this library, and not bother with what they are called internally. Easy-peasy.
 
 ## Installation
 
