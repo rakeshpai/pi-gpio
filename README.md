@@ -299,7 +299,7 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 	</tr>
 	<tr>
 		<td>
-			GPIO
+			--
 		</td>
 		<td>
 			39
@@ -308,7 +308,7 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 			40
 		</td>
 		<td>
-			--
+			GPIO
 		</td>
 	</tr>
 </table>
