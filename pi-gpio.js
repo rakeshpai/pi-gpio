@@ -1,182 +1,110 @@
 "use strict";
-var fs = require("fs"),
-	path = require("path"),
-	exec = require("child_process").exec;
 
-var gpioAdmin = "gpio-admin",
-	sysFsPath = "/sys/devices/virtual/gpio";
+var gpioUtil = require("pi-gpioutil");
 
-var rev = fs.readFileSync("/proc/cpuinfo").toString().split("\n").filter(function(line) {
-	return line.indexOf("Revision") == 0;
-})[0].split(":")[1].trim();
+var physToBcm = require("./pinMap.js").physToBcm();
+var physToWiring = require("./pinMap.js").physToWiring;
 
-rev = parseInt(rev, 16) < 3 ? 1 : 2; // http://elinux.org/RPi_HardwareHistory#Board_Revision_History
+var outputPins = [];
+var inputPins = [];
 
-var pinMapping = {
-	"3": 0,
-	"5": 1,
-	"7": 4,
-	"8": 14,
-	"10": 15,
-	"11": 17,
-	"12": 18,
-	"13": 21,
-	"15": 22,
-	"16": 23,
-	"18": 24,
-	"19": 10,
-	"21": 9,
-	"22": 25,
-	"23": 11,
-	"24": 8,
-	"26": 7,
+var parseOptions = require("./optionParser").parse;
 
-	// Model B+ pins
-	"29": 5,
-	"31": 6,
-	"32": 12,
-	"33": 13,
-	"35": 19,
-	"36": 16,
-	"37": 26,
-	"38": 20,
-	"40": 21
-};
-
-if(rev == 2) {
-	pinMapping["3"] = 2;
-	pinMapping["5"] = 3;
-	pinMapping["13"] = 27;
-}
-
-function isNumber(number) {
-	return !isNaN(parseInt(number, 10));
-}
-
-function noop(){}
-
-function handleExecResponse(method, pinNumber, callback) {
-	return function(err, stdout, stderr) {
-		if(err) {
-			console.error("Error when trying to", method, "pin", pinNumber);
-			console.error(stderr);
-			callback(err);
-		} else {
-			callback();
-		}
-	}
-}
-
-function sanitizePinNumber(pinNumber) {
-	if(!isNumber(pinNumber) || !isNumber(pinMapping[pinNumber])) {
-		throw new Error("Pin number isn't valid");
-	}
-
-	return parseInt(pinNumber, 10);
-}
-
-function sanitizeDirection(direction) {
-	direction = (direction || "").toLowerCase().trim();
-	if(direction === "in" || direction === "input") {
-		return "in";
-	} else if(direction === "out" || direction === "output" || !direction) {
-		return "out";
-	} else {
-		throw new Error("Direction must be 'input' or 'output'");
-	}
-}
-
-function sanitizeOptions(options) {
-	var sanitized = {};
-
-	options.split(" ").forEach(function(token) {
-		if(token == "in" || token == "input") {
-			sanitized.direction = "in";
-		}
-
-		if(token == "pullup" || token == "up") {
-			sanitized.pull = "pullup";
-		}
-
-		if(token == "pulldown" || token == "down") {
-			sanitized.pull = "pulldown";
-		}
-	});
-
-	if(!sanitized.direction) {
-		sanitized.direction = "out";
-	}
-
-	if(!sanitized.pull) {
-		sanitized.pull = "";
-	}
-
-	return sanitized;
-}
+function noop(){};
 
 var gpio = {
-	rev: rev,
-	
-	open: function(pinNumber, options, callback) {
-		pinNumber = sanitizePinNumber(pinNumber);
+    read: function(physPin, callback, forceExport) {
+        function readVal() {
+            gpioUtil.read(physToWiring[physPin], function(err, stdout, stderr, boolVal) {
+                var intVal = boolVal ? 1 : 0;
+                (callback || noop)(err, intVal);
+            });
+        }
 
-		if(!callback && typeof options === "function") {
-			callback = options;
-			options = "out";
-		}
+        if (inputPins.indexOf(physPin) === -1 || forceExport) {
+            gpioUtil.export(physToBcm[physPin], "in", function(err, stdout, stderr) {
+                if (!err) {
+                    outputPins = outputPins.filter(function(e) { return e !== physPin; });
+                    inputPins.push(physPin);
+                    readVal();
+                }
+            });
+        } else {
+            readVal();
+        }
+    },
 
-		options = sanitizeOptions(options);
+    write: function(physPin, value, callback, forceExport) {
+        if (outputPins.indexOf(physPin) === -1 || forceExport) {
+            gpioUtil.export(physToBcm[physPin], "out", function(err, stdout, stderr) {
+                if (!err) {
+                    inputPins = inputPins.filter(function(e) { return e !== physPin; });
+                    outputPins.push(physPin);
+                    gpioUtil.write(physToWiring[physPin], value, (callback || noop));
+                }
+            });
+        } else {
+            gpioUtil.write(physToWiring[physPin], value, function(err, stdout, stderr) {
+                (callback || noop)(err);
+            });
+        }
+    },
 
-		exec(gpioAdmin + " export " + pinMapping[pinNumber] + " " + options.pull, handleExecResponse("open", pinNumber, function(err) {
-			if(err) return (callback || noop)(err);
+    export: function(physPin, optionsString, callback) {
+        // allow option parameter to be omitted
+        if (typeof optionsString === 'function') {
+            callback = optionsString;
+            optionsString = '';
+        }
 
-			gpio.setDirection(pinNumber, options.direction, callback);
-		}));
-	},
+        var options = parseOptions(optionsString);
 
-	setDirection: function(pinNumber, direction, callback) {
-		pinNumber = sanitizePinNumber(pinNumber);
-		direction = sanitizeDirection(direction);
+        gpioUtil.export(physToBcm[physPin], options.direction, function(err, stdout, stderr) {
+            if (err) {
+                console.error("ERROR [pi-gpio] failed to export pin " + physPin);
+            }
+            if (options.direction === 'in') {
+                inputPins.push(physPin);
+            } else if (options.direction === 'out') {
+                outputPins.push(physPin);
+            }
 
-		fs.writeFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/direction", direction, (callback || noop));
-	},
+            if (typeof options.pull !== 'undefined') {
+                gpioUtil.mode(physToWiring[physPin], options.pull, (callback || noop));
+            } else {
+                (callback || noop)(err);
+            }
+        });
+    },
 
-	getDirection: function(pinNumber, callback) {
-		pinNumber = sanitizePinNumber(pinNumber);
-		callback = callback || noop;
+    unexport: function(physPin, callback) {
+        gpioUtil.unexport(physToBcm[physPin], function(err, stdout, stderr) {
+            if (err) {
+                console.error("ERROR [pi-gpio] failed to unexport pin " + physPin);
+            }
+            inputPins = inputPins.filter(function(e) { return e !== physPin; });
+            outputPins = outputPins.filter(function(e) { return e !== physPin; });
+            (callback || noop)(err);
+        });
+    },
 
-		fs.readFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/direction", "utf8", function(err, direction) {
-			if(err) return callback(err);
-			callback(null, sanitizeDirection(direction.trim()));
-		});
-	},
-
-	close: function(pinNumber, callback) {
-		pinNumber = sanitizePinNumber(pinNumber);
-
-		exec(gpioAdmin + " unexport " + pinMapping[pinNumber], handleExecResponse("close", pinNumber, callback || noop));
-	},
-
-	read: function(pinNumber, callback) {
-		pinNumber = sanitizePinNumber(pinNumber);
-
-		fs.readFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/value", function(err, data) {
-			if(err) return (callback || noop)(err);
-
-			(callback || noop)(null, parseInt(data, 10));
-		});
-	},
-
-	write: function(pinNumber, value, callback) {
-		pinNumber = sanitizePinNumber(pinNumber);
-
-		value = !!value?"1":"0";
-
-		fs.writeFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/value", value, "utf8", callback);
-	}
+    getMode: function(physPin, callback) {
+        gpioUtil.readall(function(err, stdout, stderr, pins) {
+            var relevantPin = pins.filter(function(pin) {
+                return pin.phys === physPin;
+            })[0];
+            (callback || noop)(err, relevantPin.mode);
+        });
+    }
 };
 
-gpio.export = gpio.open;
-gpio.unexport = gpio.close;
+// aliases
+gpio.open         = gpio.export;
+gpio.setDirection = gpio.export;
+gpio.close        = gpio.unexport;
+
+// note that mode is not quite the same as direction
+// mode can not only be 'in' or 'out', but also e.g. 'alt0'
+gpio.getDirection = gpio.getMode;
 
 module.exports = gpio;

@@ -18,7 +18,9 @@
     "gpio",
     "simple"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "pi-gpioUtil": "tjanson/pi-gpioUtil"
+  },
   "devDependencies": {
     "mocha": "1.x",
     "should": "1.x"
