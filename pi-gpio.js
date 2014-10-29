@@ -1,5 +1,6 @@
 "use strict";
 
+var fs = require("fs");
 var gpioUtil = require("pi-gpioutil");
 
 var physToBcm = require("./pinMap.js").physToBcm;
@@ -10,45 +11,43 @@ var inputPins = [];
 
 var parseOptions = require("./optionParser").parse;
 
+var sysFsPath = "/sys/devices/virtual/gpio";
+
 function noop(){};
 
 var gpio = {
     read: function(physPin, callback, exportMode) {
-        function readVal() {
-            gpioUtil.read(physToWiring(physPin), function(err, stdout, stderr, boolVal) {
-                var intVal = boolVal ? 1 : 0;
-                (callback || noop)(err, intVal);
-            });
+        function readVal(err) {
+            if (err) {
+                (callback || noop)(err);
+            } else {
+                fs.readFile(sysFsPath + "/gpio" + physToBcm(physPin) + "/value", "utf8", function(err, val) {
+                    if (err) return (callback || noop)(err);
+                    (callback || noop)(null, parseInt(val.trim(), 10));
+                });
+            }
         }
 
         if ((inputPins.indexOf(physPin) === -1 && exportMode !== 'off') || exportMode === 'force') {
-            gpioUtil.export(physToBcm(physPin), "in", function(err, stdout, stderr) {
-                if (!err) {
-                    outputPins = outputPins.filter(function(e) { return e !== physPin; });
-                    inputPins.push(physPin);
-                    readVal();
-                } else {
-                    throw new Error(err);
-                }
-            });
+            this.export(physPin, "in", readVal);
         } else {
             readVal();
         }
     },
 
     write: function(physPin, value, callback, exportMode) {
-        if ((outputPins.indexOf(physPin) === -1 && exportMode !== 'off') || exportMode === 'force') {
-            gpioUtil.export(physToBcm(physPin), "out", function(err, stdout, stderr) {
-                if (!err) {
-                    inputPins = inputPins.filter(function(e) { return e !== physPin; });
-                    outputPins.push(physPin);
-                    gpioUtil.write(physToWiring(physPin), value, (callback || noop));
-                }
-            });
-        } else {
-            gpioUtil.write(physToWiring(physPin), value, function(err, stdout, stderr) {
+        function writeVal(err) {
+            if (err) {
                 (callback || noop)(err);
-            });
+            } else {
+                fs.writeFile(sysFsPath + "/gpio" + physToBcm(physPin) + "/value", value, "utf8", (callback || noop));
+            }
+        }
+
+        if ((outputPins.indexOf(physPin) === -1 && exportMode !== 'off') || exportMode === 'force') {
+            this.export(physPin, "out", writeVal);
+        } else {
+            writeVal();
         }
     },
 
