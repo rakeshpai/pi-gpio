@@ -90,23 +90,21 @@ var gpio = {
         });
     },
 
-    getMode: function(physPin, callback) {
-        gpioUtil.readall(function(err, stdout, stderr, pins) {
-            var relevantPin = pins.filter(function(pin) {
-                return pin.phys === physPin;
-            })[0];
-            (callback || noop)(err, relevantPin.mode);
+    getDirection: function(physPin, callback) {
+        fs.readFile(sysFsPath + "/gpio" + physToBcm(physPin) + "/direction", "utf8", function(err, direction) {
+            if (err) return (callback || noop)(err);
+            (callback || noop)(null, direction.trim());
         });
+    },
+
+    setDirection: function(physPin, direction, callback) {
+        direction = parseDirection(direction);
+        fs.writeFile(sysFsPath + "/gpio" + physToBcm(physPin) + "/direction", direction, (callback || noop));
     }
 };
 
 // aliases
-gpio.open         = gpio.export;
-gpio.setDirection = gpio.export;
-gpio.close        = gpio.unexport;
-
-// note that mode is not quite the same as direction
-// mode can not only be 'in' or 'out', but also e.g. 'alt0'
-gpio.getDirection = gpio.getMode;
+gpio.open  = gpio.export;
+gpio.close = gpio.unexport;
 
 module.exports = gpio;
