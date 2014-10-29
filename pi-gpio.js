@@ -13,7 +13,7 @@ var parseOptions = require("./optionParser").parse;
 function noop(){};
 
 var gpio = {
-    read: function(physPin, callback, forceExport) {
+    read: function(physPin, callback, exportMode) {
         function readVal() {
             gpioUtil.read(physToWiring[physPin], function(err, stdout, stderr, boolVal) {
                 var intVal = boolVal ? 1 : 0;
@@ -21,12 +21,14 @@ var gpio = {
             });
         }
 
-        if (inputPins.indexOf(physPin) === -1 || forceExport) {
+        if ((inputPins.indexOf(physPin) === -1 && exportMode !== 'off') || exportMode === 'force') {
             gpioUtil.export(physToBcm[physPin], "in", function(err, stdout, stderr) {
                 if (!err) {
                     outputPins = outputPins.filter(function(e) { return e !== physPin; });
                     inputPins.push(physPin);
                     readVal();
+                } else {
+                    throw new Error(err);
                 }
             });
         } else {
@@ -34,8 +36,8 @@ var gpio = {
         }
     },
 
-    write: function(physPin, value, callback, forceExport) {
-        if (outputPins.indexOf(physPin) === -1 || forceExport) {
+    write: function(physPin, value, callback, exportMode) {
+        if ((outputPins.indexOf(physPin) === -1 && exportMode !== 'off') || exportMode === 'force') {
             gpioUtil.export(physToBcm[physPin], "out", function(err, stdout, stderr) {
                 if (!err) {
                     inputPins = inputPins.filter(function(e) { return e !== physPin; });
