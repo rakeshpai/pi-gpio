@@ -3,15 +3,21 @@ pi-gpio
 
 pi-gpio is a simple node.js based library to help access the GPIO of the Raspberry Pi (Debian Wheezy). It's modelled loosely around the built-in ``fs`` module. Works with the original Raspberry Pi (A and B), the model B revision 2 boards, and the Raspberry Pi Model B+.
 
+After the [installation](#installation), reading and writing is as easy as this:
 ```javascript
 var gpio = require("pi-gpio");
 
-gpio.open(16, "output", function(err) {		// Open pin 16 for output
-	gpio.write(16, 1, function() {			// Set pin 16 high (1)
-		gpio.close(16);						// Close pin 16
-	});
+gpio.write(16, 1, function() {
+    console.log("Physical pin no. 16 set to high.");
+});
+
+gpio.read(11, function(err, value) {
+    if (!err) {
+        console.log("Pin 11 is reading " + (value === 1 ? "high" : "low"));
+    }
 });
 ```
+See the [usage reference](#usage) below for more information.
 
 ## How you can help
 
@@ -321,17 +327,13 @@ If you haven't already, get node and npm on the Pi. The simplest way is:
 
 	sudo apt-get install nodejs npm
 
-The Raspberry Pi's GPIO pins require you to be root to access them. That's totally unsafe for several reasons. To get around this problem, you should use the excellent [gpio-admin](https://github.com/quick2wire/quick2wire-gpio-admin).
+The Raspberry Pi's GPIO pins require you to be root to access them. That's totally unsafe for several reasons. To get around this problem, you should use the excellent [Wiring Pi GPIO utility](http://wiringpi.com/the-gpio-utility/).
 
-Do the following on your raspberry pi:
+Install Wiring Pi (which includes the tool) [as described on their website](http://wiringpi.com/download-and-install/):
 
-	git clone git://github.com/quick2wire/quick2wire-gpio-admin.git
-	cd quick2wire-gpio-admin
-	make
-	sudo make install
-	sudo adduser $USER gpio
-
-After this, you will need to logout and log back in. [Details](http://quick2wire.com/2012/05/safe-controlled-access-to-gpio-on-the-raspberry-pi/), if you are interested.
+    git clone git://git.drogon.net/wiringPi
+	cd wiringPi
+    ./build
 
 Next, ``cd`` to your project directory and use npm to install pi-gpio in your project.
 
@@ -341,46 +343,16 @@ That's it!
 
 ## Usage
 
-### .open(pinNumber, [options], [callback])
+### .read(pinNumber, [callback], [exportMode])
 
-Aliased to ``.export``
+Reads the current value of the pin.
 
-Makes ``pinNumber`` available for use. 
-
-* ``pinNumber``: The pin number to make available. Remember, ``pinNumber`` is the physical pin number on the Pi. 
-* ``options``: (Optional) Should be a string, such as ``input`` or ``input pullup``. You can specify whether the pin direction should be `input` or `output` (or `in` or `out`). You can additionally set the internal pullup / pulldown resistor by sepcifying `pullup` or `pulldown` (or `up` or `down`). If options isn't provided, it defaults to `output`. If a direction (`input` or `output`) is not specified (eg. only `up`), then the direction defaults to `output`.
-* ``callback``: (Optional) Will be called when the pin is available for use. May receive an error as the first argument if something went wrong.
-
-### .close(pinNumber, [callback])
-
-Aliased to ``.unexport``
-
-Closes ``pinNumber``.
-
-* ``pinNumber``: The pin number to close. Again, ``pinNumber`` is the physical pin number on the Pi.
-* ``callback``: (Optional) Will be called when the pin is closed. Again, may receive an error as the first argument.
-
-### .setDirection(pinNumber, direction, [callback])
-
-Changes the direction from ``input`` to ``output`` or vice-versa.
-
-* ``pinNumber``: As usual.
-* ``direction``: Either ``input`` or ``in`` or ``output`` or ``out``.
-* ``callback``: Will be called when direction change is complete. May receive an error as usual.
-
-### .getDirection(pinNumber, [callback])
-
-Gets the direction of the pin. Acts like a getter for the method above.
-
-* ``pinNumber``: As usual
-* ``callback``: Will be called when the direction is received. The first argument could be an error. The second argument will either be ``in`` or ``out``. 
-
-### .read(pinNumber, [callback])
-
-Reads the current value of the pin. Most useful if the pin is in the ``input`` direction.
-
-* ``pinNumber``: As usual.
-* ``callback``: Will receive a possible error object as the first argument, and the value of the pin as the second argument. The value will be either ``0`` or ``1`` (numeric).
+* `pinNumber`: As usual.
+* `callback`: Will receive a possible error object as the first argument, and the value of the pin as the second argument. The value will be either `0` or `1` (numeric).
+* `exportMode` (optional): May be omitted, `'off'`, or `'force'`.  
+  If omitted, the pin will be exported as input before reading unless its last known state is input.  
+  If `'off'`, the pin will be neither exported nor its direction adjusted; leaving those tasks to you. (This matches the old pre-`v0.1.0` behaviour.)  
+  If `'force'`, the pin will be exported as input, even if that's its last known state.
 
 Example:
 ```javascript
@@ -390,13 +362,76 @@ gpio.read(16, function(err, value) {
 });
 ```
 
-### .write(pinNumber, value, [callback])
+### .write(pinNumber, value, [callback], [exportMode])
 
-Writes ``value`` to ``pinNumber``. Will obviously fail if the pin is not in the ``output`` direction.
+Writes `value` to `pinNumber`.
 
-* ``pinNumber``: As usual.
-* ``value``: Should be either a numeric ``0`` or ``1``. Any value that isn't ``0`` or ``1`` will be coerced to be boolean, and then converted to 0 (false) or 1 (true). Just stick to sending a numeric 0 or 1, will you? ;)
-* ``callback``: Will be called when the value is set. Again, might receive an error.
+* `pinNumber`: As usual.
+* `value`: Must be either `0` or `1`, or equivalently `false` or `true`.
+* `callback` (optional): Will be called when the value is set. Again, might receive an error.
+* `exportMode` (optional): May be omitted, `'off'`, or `'force'`.  
+  If omitted, the pin will be exported as output before writing unless its last known state is output.  
+  If `'off'`, the pin will be neither exported nor its direction adjusted; leaving those tasks to you. (This matches the old pre-`v0.1.0` behaviour.)  
+  If `'force'`, the pin will be exported as output, even if that's its last known state.
+
+Example:
+```js
+gpio.write(16, 1, function(err) {
+    if(err) throw err;
+    console.log("Pin 16 set to HIGH.");
+});
+```
+
+### .export(pinNumber, [options], [callback])
+
+Aliased to `.open`
+
+Uses the [GPIO utility](http://wiringpi.com/the-gpio-utility/) to *export* the pin via the `/sys/class/gpio` interface. By default, `.write` and `.read` will automatically export the pin as output/input respectively (see their `exportMode` parameter), so you should not *need* to call this – but it doesn't hurt, if you want to be explicit.
+Note: Starting with `v0.1.0`, exporting a pin that's already exported does no harm.
+
+* `pinNumber`: The pin number to make available. Remember, `pinNumber` is the physical pin number on the Pi.
+* `options` (optional): Must be a string of options separated by a space, such as `input` or `input pullup`.  
+  You can specify whether the pin direction should be `input` (equivalently `in`) or `output` (`out`).  
+  You can additionally set the internal pullup / pulldown resistor by sepcifying `pullup` (`up`), `pulldown` (`down`), or `tri` (neither pullup not pulldown).  
+  If no direction is given, it defaults to `output`.  
+  If no resistor setting is given, it will not be changed.  
+* `callback` (optional): Will be called when the pin is available for use. May receive an error as the first argument if something went wrong.
+
+Example:
+```js
+// export as input, engage internal pullup
+gpio.export(16, 'in pullup', function(err) {
+    // and read value
+    if (!err) gpio.read(16, function(err, value) {
+        if (!err) console.log(value);
+    });
+});
+```
+### .unexport(pinNumber, [callback])
+
+Aliased to `.close`
+
+*Unexports* pin, that is, removes it from the `/sys/class/gpio` interface.
+You may unexport the pins you exported if you want to leave your Pi exactly like you found it, but if you just leave them open, there's no harm in that either.
+
+* `pinNumber`: The pin number to close. Again, `pinNumber` is the physical pin number on the Pi.
+* `callback` (optional): Will be called when the pin is closed. Again, may receive an error as the first argument.
+
+### .setDirection(pinNumber, direction, [callback])
+
+Changes the direction from `input` to `output` or vice-versa.
+Note: By default, `read` and `write` will automatically change the direction to `input`/`output` respectively.
+
+* `pinNumber`: As usual.
+* `direction`: Either `input` (or `in`) or `output` (`out`).
+* `callback`: Will be called when direction change is complete. May receive an error as usual.
+
+### .getDirection(pinNumber, [callback])
+
+Gets the direction of the pin. Acts like a getter for the method above.
+
+* `pinNumber`: As usual.
+* `callback`: Will be called when the direction is received. The first argument could be an error. The second argument will either be `'in'` or `'out'`.
 
 ## Misc
 
@@ -412,7 +447,7 @@ Writes ``value`` to ``pinNumber``. Will obviously fail if the pin is not in the 
 
 (The MIT License)
 
-Copyright (c) 2012 Rakesh Pai <rakeshpai@gmail.com>
+Copyright (c) 2012–2014 Rakesh Pai <rakeshpai@gmail.com> and contributors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
