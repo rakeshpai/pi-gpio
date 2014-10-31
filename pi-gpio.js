@@ -1,15 +1,16 @@
 "use strict";
 
-var fs = require("fs");
-var gpioUtil = require("pi-gpioutil");
-
-var physToBcm = require("./pinMap.js").physToBcm;
-var physToWiring = require("./pinMap.js").physToWiring;
+var fs             = require("fs");
+var gpioUtil       = require("pi-gpioutil");
+var revision       = require("./piRevision");
+var physToBcm      = require("./pinMap").physToBcm;
+var physToWiring   = require("./pinMap").physToWiring;
+var parseOptions   = require("./paramParser").parseOptions;
+var parseValue     = require("./paramParser").parseValue;
+var parseDirection = require("./paramParser").parseDirection;
 
 var outputPins = [];
 var inputPins = [];
-
-var parseOptions = require("./optionParser").parse;
 
 var sysFsPath = "/sys/devices/virtual/gpio";
 
@@ -40,7 +41,7 @@ var gpio = {
             if (err) {
                 (callback || noop)(err);
             } else {
-                fs.writeFile(sysFsPath + "/gpio" + physToBcm(physPin) + "/value", value, "utf8", (callback || noop));
+                fs.writeFile(sysFsPath + "/gpio" + physToBcm(physPin) + "/value", parseValue(value), "utf8", (callback || noop));
             }
         }
 

@@ -31,4 +31,24 @@ function parseOptions(string) {
     return options;
 }
 
-exports.parse = parseOptions;
+function parseValue(value) {
+    switch (value) {
+        case true:
+        case 1:
+        case '1':
+            return '1';
+            break;
+        case false:
+        case 0:
+        case '0':
+            return '0';
+            break;
+        default:
+            throw new Error('Illegal on/off value');
+            break;
+    }
+}
+
+exports.parseOptions = parseOptions;
+exports.parseValue   = parseValue;
+exports.parseDirection = function(dir) { return parseOptions(dir).direction; };
