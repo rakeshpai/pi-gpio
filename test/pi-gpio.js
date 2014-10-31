@@ -23,6 +23,12 @@ function verifyValue(value, done) {
 }
 
 describe("pi-gpio", function() {
+    describe(".rev", function() {
+        it("should be 1 or 2", function() {
+            gpio.rev.should.be.within(1, 2);
+        });
+    });
+
     describe("hooks", function() {
         before("close pin", function(done) {
             gpio.close(testPin, done);
@@ -116,7 +122,7 @@ describe("pi-gpio", function() {
     ["0", "1"].forEach(function(testValue) {
         describe("hooks", function() {
             before("set pin to: " + testValue, function(done) {
-                gpio.write(testPin, testValue, done, true); // force-export
+                gpio.write(testPin, testValue, done, 'force'); // force-export
             });
 
             describe(".read", function() {

@@ -17,6 +17,8 @@ var sysFsPath = "/sys/devices/virtual/gpio";
 function noop(){};
 
 var gpio = {
+    rev: revision,
+
     read: function(physPin, callback, exportMode) {
         function readVal(err) {
             if (err) {
