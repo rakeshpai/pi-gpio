@@ -20,6 +20,11 @@ var gpio = {
     rev: revision,
 
     read: function(physPin, callback, exportMode) {
+        if (typeof callback === 'string') {
+            exportMode = callback;
+            callback = null;
+        }
+
         function readVal(err) {
             if (err) {
                 (callback || noop)(err);
@@ -39,6 +44,11 @@ var gpio = {
     },
 
     write: function(physPin, value, callback, exportMode) {
+        if (typeof callback === 'string') {
+            exportMode = callback;
+            callback = null;
+        }
+
         function writeVal(err) {
             if (err) {
                 (callback || noop)(err);
