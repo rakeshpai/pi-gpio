@@ -1,8 +1,8 @@
 pi-gpio
 =======
 
-pi-gpio is a simple node.js based library to help access the GPIO of the Raspberry Pi (Debian Wheezy). It's modelled loosely around the built-in ``fs`` module.
-Works with:
+pi-gpio is a simple node.js based library to help access the GPIO of the Raspberry Pi (Debian Wheezy). It's modelled loosely around the built-in ``fs`` module.  
+It works with:
 * original Raspberry Pi (A and B)
 * model B revision 2 boards
 * Raspberry Pi Model A+
