@@ -1,7 +1,12 @@
 pi-gpio
 =======
 
-pi-gpio is a simple node.js based library to help access the GPIO of the Raspberry Pi (Debian Wheezy). It's modelled loosely around the built-in ``fs`` module. Works with the original Raspberry Pi (A and B), the model B revision 2 boards, and the Raspberry Pi Model B+.
+pi-gpio is a simple node.js based library to help access the GPIO of the Raspberry Pi (Debian Wheezy). It's modelled loosely around the built-in ``fs`` module.  
+It works with:
+* original Raspberry Pi (A and B)
+* model B revision 2 boards
+* Raspberry Pi Model A+
+* Raspberry Pi Model B+
 
 ```javascript
 var gpio = require("pi-gpio");
@@ -211,7 +216,7 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 		</td>
 	</tr>
 	<tr>
-		<td colspan="4">Model B+ pins</td>
+		<td colspan="4">Model A+ and Model B+ additional pins</td>
 	</tr>
 	<tr>
 		<td>
@@ -313,7 +318,7 @@ This library simplifies all of this (hopefully), by abstracting away the Broadco
 	</tr>
 </table>
 
-That gives you several GPIO pins to play with: pins 7, 11, 12, 13, 15, 16, 18 and 22 (with the B+ giving 29, 31, 32, 33, 35, 37, 38 and 40). You should provide these physical pin numbers to this library, and not bother with what they are called internally. Easy-peasy.
+That gives you several GPIO pins to play with: pins 7, 11, 12, 13, 15, 16, 18 and 22 (with A+ and B+ giving 29, 31, 32, 33, 35, 37, 38 and 40). You should provide these physical pin numbers to this library, and not bother with what they are called internally. Easy-peasy.
 
 ## Installation
 
