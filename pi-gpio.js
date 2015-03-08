@@ -1,14 +1,23 @@
 "use strict";
 var fs = require("fs"),
-	path = require("path"),
-	exec = require("child_process").exec;
+  path = require("path"),
+  exec = require("child_process").exec;
 
 var gpioAdmin = "gpio-admin",
-	sysFsPath = "/sys/devices/virtual/gpio";
+  sysFsPathOld = "/sys/devices/virtual/gpio", // pre 3.18.x kernel
+  sysFsPathNew = "/sys/class/gpio", // post 3.18.x kernel
+  sysFsPath;
 
 var rev = fs.readFileSync("/proc/cpuinfo").toString().split("\n").filter(function(line) {
-	return line.indexOf("Revision") == 0;
+  return line.indexOf("Revision") == 0;
 })[0].split(":")[1].trim();
+
+// tests the device tree directory to determine the actual gpio path
+if (fs.existsSync('/sys/devices/soc')) {
+  sysFsPath = sysFsPathNew;
+} else {
+  sysFsPath = sysFsPathOld; // fallback for old kernels
+}
 
 rev = parseInt(rev, 16) < 3 ? 1 : 2; // http://elinux.org/RPi_HardwareHistory#Board_Revision_History
 
@@ -31,7 +40,7 @@ var pinMapping = {
 	"24": 8,
 	"26": 7,
 
-	// Model A+ and Model B+ pins
+	// Model B+ pins
 	"29": 5,
 	"31": 6,
 	"32": 12,
@@ -43,7 +52,7 @@ var pinMapping = {
 	"40": 21
 };
 
-if (rev == 2) {
+if(rev == 2) {
 	pinMapping["3"] = 2;
 	pinMapping["5"] = 3;
 	pinMapping["13"] = 27;
@@ -53,11 +62,11 @@ function isNumber(number) {
 	return !isNaN(parseInt(number, 10));
 }
 
-function noop() {}
+function noop(){}
 
 function handleExecResponse(method, pinNumber, callback) {
 	return function(err, stdout, stderr) {
-		if (err) {
+		if(err) {
 			console.error("Error when trying to", method, "pin", pinNumber);
 			console.error(stderr);
 			callback(err);
@@ -68,7 +77,7 @@ function handleExecResponse(method, pinNumber, callback) {
 }
 
 function sanitizePinNumber(pinNumber) {
-	if (!isNumber(pinNumber) || !isNumber(pinMapping[pinNumber])) {
+	if(!isNumber(pinNumber) || !isNumber(pinMapping[pinNumber])) {
 		throw new Error("Pin number isn't valid");
 	}
 
@@ -77,9 +86,9 @@ function sanitizePinNumber(pinNumber) {
 
 function sanitizeDirection(direction) {
 	direction = (direction || "").toLowerCase().trim();
-	if (direction === "in" || direction === "input") {
+	if(direction === "in" || direction === "input") {
 		return "in";
-	} else if (direction === "out" || direction === "output" || !direction) {
+	} else if(direction === "out" || direction === "output" || !direction) {
 		return "out";
 	} else {
 		throw new Error("Direction must be 'input' or 'output'");
@@ -90,24 +99,24 @@ function sanitizeOptions(options) {
 	var sanitized = {};
 
 	options.split(" ").forEach(function(token) {
-		if (token == "in" || token == "input") {
+		if(token == "in" || token == "input") {
 			sanitized.direction = "in";
 		}
 
-		if (token == "pullup" || token == "up") {
+		if(token == "pullup" || token == "up") {
 			sanitized.pull = "pullup";
 		}
 
-		if (token == "pulldown" || token == "down") {
+		if(token == "pulldown" || token == "down") {
 			sanitized.pull = "pulldown";
 		}
 	});
 
-	if (!sanitized.direction) {
+	if(!sanitized.direction) {
 		sanitized.direction = "out";
 	}
 
-	if (!sanitized.pull) {
+	if(!sanitized.pull) {
 		sanitized.pull = "";
 	}
 
@@ -116,11 +125,11 @@ function sanitizeOptions(options) {
 
 var gpio = {
 	rev: rev,
-
+	
 	open: function(pinNumber, options, callback) {
 		pinNumber = sanitizePinNumber(pinNumber);
 
-		if (!callback && typeof options === "function") {
+		if(!callback && typeof options === "function") {
 			callback = options;
 			options = "out";
 		}
@@ -128,7 +137,7 @@ var gpio = {
 		options = sanitizeOptions(options);
 
 		exec(gpioAdmin + " export " + pinMapping[pinNumber] + " " + options.pull, handleExecResponse("open", pinNumber, function(err) {
-			if (err) return (callback || noop)(err);
+			if(err) return (callback || noop)(err);
 
 			gpio.setDirection(pinNumber, options.direction, callback);
 		}));
@@ -146,7 +155,7 @@ var gpio = {
 		callback = callback || noop;
 
 		fs.readFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/direction", "utf8", function(err, direction) {
-			if (err) return callback(err);
+			if(err) return callback(err);
 			callback(null, sanitizeDirection(direction.trim()));
 		});
 	},
@@ -161,7 +170,7 @@ var gpio = {
 		pinNumber = sanitizePinNumber(pinNumber);
 
 		fs.readFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/value", function(err, data) {
-			if (err) return (callback || noop)(err);
+			if(err) return (callback || noop)(err);
 
 			(callback || noop)(null, parseInt(data, 10));
 		});
@@ -170,7 +179,7 @@ var gpio = {
 	write: function(pinNumber, value, callback) {
 		pinNumber = sanitizePinNumber(pinNumber);
 
-		value = !!value ? "1" : "0";
+		value = !!value?"1":"0";
 
 		fs.writeFile(sysFsPath + "/gpio" + pinMapping[pinNumber] + "/value", value, "utf8", callback);
 	}
