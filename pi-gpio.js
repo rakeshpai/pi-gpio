@@ -4,11 +4,20 @@ var fs = require("fs"),
 	exec = require("child_process").exec;
 
 var gpioAdmin = "gpio-admin",
-	sysFsPath = "/sys/devices/virtual/gpio";
+	sysFsPathOld = "/sys/devices/virtual/gpio", // pre 3.18.x kernel
+	sysFsPathNew = "/sys/class/gpio", // post 3.18.x kernel
+	sysFsPath;
 
 var rev = fs.readFileSync("/proc/cpuinfo").toString().split("\n").filter(function(line) {
 	return line.indexOf("Revision") == 0;
 })[0].split(":")[1].trim();
+
+// tests the device tree directory to determine the actual gpio path
+if (fs.existsSync('/sys/devices/soc')) {
+	sysFsPath = sysFsPathNew;
+} else {
+	sysFsPath = sysFsPathOld; // fallback for old kernels
+}
 
 rev = parseInt(rev, 16) < 3 ? 1 : 2; // http://elinux.org/RPi_HardwareHistory#Board_Revision_History
 
