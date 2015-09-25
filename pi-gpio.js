@@ -13,7 +13,7 @@ var rev = fs.readFileSync("/proc/cpuinfo").toString().split("\n").filter(functio
 })[0].split(":")[1].trim();
 
 // tests the device tree directory to determine the actual gpio path
-if (fs.existsSync('/sys/devices/soc')) {
+if (fs.existsSync(sysFsPathNew)) {
 	sysFsPath = sysFsPathNew;
 } else {
 	sysFsPath = sysFsPathOld; // fallback for old kernels
